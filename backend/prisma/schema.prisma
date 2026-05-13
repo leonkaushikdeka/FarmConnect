@@ -36,55 +36,59 @@ enum PaymentStatus {
 }
 
 model User {
-  id           String   @id @default(cuid())
-  email        String   @unique
-  phone        String?
-  name         String
-  password     String
-  role         UserRole @default(CUSTOMER)
-  imageUrl     String?
-  location     String?
-  lat          Float?
-  lng          Float?
-  active       Boolean  @default(true)
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+   id           String    @id @default(cuid())
+   email        String    @unique
+   phone        String?
+   name         String
+   password     String
+   role         UserRole  @default(CUSTOMER)
+   imageUrl     String?
+   location     String?
+   lat          Float?
+   lng          Float?
+geoLocation  Unsupported("point")?,
+    active       Boolean   @default(true),
+    createdAt    DateTime  @default(now())
+    updatedAt    DateTime  @updatedAt
+    fcmToken     String?
 
-  farmer       Farmer?
-  orders       Order[]
-  cartItems    CartItem[]
+    farmer       Farmer?
+    orders       Order[]
+    cartItems    CartItem[]
 
-  @@index([email])
-  @@index([role])
-}
+    @@index([email])
+   @@index([role])
+   @@index([lat, lng])
+ }
 
 model Farmer {
-  id            String   @id @default(cuid())
-  userId        String   @unique
-  farmName      String
-  description   String
-  story         String?
-  imageUrl      String?
-  coverUrl      String?
-  phone         String
-  address       String
-  lat           Float?
-  lng           Float?
-  rating        Float    @default(0)
-  reviewCount   Int      @default(0)
-  certifications String[]
-  deliveryRadius Int     @default(20)
-  minOrder      Float    @default(0)
-  active        Boolean  @default(true)
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
+   id            String    @id @default(cuid())
+   userId        String    @unique
+   farmName      String
+   description   String
+   story         String?
+   imageUrl      String?
+   coverUrl      String?
+   phone         String
+   address       String
+   lat           Float?
+   lng           Float?
+   geoLocation   Unsupported("point")?
+   rating        Float     @default(0)
+   reviewCount   Int       @default(0)
+   certifications String[]
+   deliveryRadius Int      @default(20)
+   minOrder      Float     @default(0)
+   active        Boolean   @default(true)
+   createdAt     DateTime  @default(now())
+   updatedAt     DateTime  @updatedAt
 
-  user         User      @relation(fields: [userId], references: [id], onDelete: Cascade)
-  products     Product[]
-  orders       Order[]
+   user         User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+   products     Product[]
+   orders       Order[]
 
-  @@index([lat, lng])
-}
+   @@index([lat, lng])
+ }
 
 model Product {
   id          String   @id @default(cuid())

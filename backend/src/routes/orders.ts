@@ -2,6 +2,7 @@ import type { FastifyInstance } from "fastify";
 import { prisma } from "../services/prisma.js";
 import { authenticate, requireRole } from "../middleware/auth.js";
 import { z } from "zod";
+import { notifyOrderPlaced, notifyOrderStatusChanged } from "../services/notification.js";
 
 const placeOrder = z.object({
   farmerId: z.string(),
@@ -67,7 +68,22 @@ export async function orderRoutes(app: FastifyInstance) {
         paymentMethod: body.paymentMethod,
         items: { create: orderItems },
       },
-      include: { items: true, farmer: { include: { user: { select: { name: true } } } } },
+      include: {
+        items: true,
+        farmer: { include: { user: { select: { name: true } } } },
+      },
+    });
+
+    // Send notifications to farmer and customer
+    await notifyOrderPlaced({
+      id: order.id,
+      orderNo: order.orderNo,
+      customerId: order.customerId,
+      farmerId: order.farmerId,
+      customerName: order.customerName,
+      totalAmount: order.totalAmount,
+      itemCount: orderItems.length,
+      status: order.status,
     });
 
     return reply.status(201).send(order);
@@ -126,6 +142,16 @@ export async function orderRoutes(app: FastifyInstance) {
     if (body.status === "DELIVERED") data.deliveredAt = new Date();
 
     const updated = await prisma.order.update({ where: { id }, data });
+
+    // Notify the customer about the status change
+    await notifyOrderStatusChanged({
+      id: updated.id,
+      orderNo: updated.orderNo,
+      customerId: updated.customerId,
+      status: updated.status,
+      totalAmount: updated.totalAmount,
+    });
+
     return updated;
   });
 }

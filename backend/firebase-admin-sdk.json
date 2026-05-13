@@ -1,0 +1,30 @@
+// ============================================================
+// Firebase Admin SDK Service Account — PLACEHOLDER
+// ============================================================
+// This file is a placeholder. Replace with your actual
+// Firebase service account JSON key file.
+//
+// Steps to obtain:
+// 1. Go to https://console.firebase.google.com/
+// 2. Select your project > Project Settings > Service Accounts
+// 3. Click "Generate New Private Key"
+// 4. Save the file here as firebase-admin-sdk.json
+//
+// SECURITY: NEVER commit this file to version control.
+// Add to .gitignore:
+//   firebase-admin-sdk.json
+// ============================================================
+
+{
+  "_comment": "Firebase Admin SDK service account placeholder. Replace with your actual service account JSON key file.",
+  "type": "service_account",
+  "project_id": "YOUR_PROJECT_ID",
+  "private_key_id": "YOUR_PRIVATE_KEY_ID",
+  "private_key": "-----BEGIN RSA PRIVATE KEY-----\nYOUR_PRIVATE_KEY_HERE\n-----END RSA PRIVATE KEY-----\n",
+  "client_email": "firebase-adminsdk-xxxxx@YOUR_PROJECT_ID.iam.gserviceaccount.com",
+  "client_id": "YOUR_CLIENT_ID",
+  "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+  "token_uri": "https://oauth2.googleapis.com/token",
+  "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+  "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/firebase-adminsdk-xxxxx%40YOUR_PROJECT_ID.iam.gserviceaccount.com"
+}

@@ -1,12 +1,19 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+import 'dart:io' show Platform;
 
 class ApiConfig {
-  static const String baseUrl = 'http://10.0.2.2:4000/api';
-  static const String baseUrlWeb = 'http://localhost:4000/api';
-
-  static String get url {
-    return baseUrl;
+  static String get baseUrl {
+    if (Platform.isAndroid) {
+      return 'http://10.0.2.2:4000/api';
+    } else if (Platform.isIOS) {
+      return 'http://localhost:4000/api';
+    } else {
+      // Web / Desktop
+      const envUrl = String.fromEnvironment('API_BASE_URL', defaultValue: '');
+      if (envUrl.isNotEmpty) return envUrl;
+      return 'http://localhost:4000/api';
+    }
   }
 }
 
@@ -72,7 +79,8 @@ class ApiService {
   Map<String, dynamic> _handleResponse(http.Response res) {
     if (res.statusCode >= 200 && res.statusCode < 300) {
       if (res.body.isEmpty) return {};
-      return jsonDecode(res.body) as Map<String, dynamic>;
+      final decoded = jsonDecode(res.body);
+      return decoded is Map<String, dynamic> ? decoded : {};
     }
     throw _parseError(res);
   }
@@ -87,5 +95,16 @@ class ApiService {
     } catch (_) {
       return ApiException('Request failed (${res.statusCode})', statusCode: res.statusCode);
     }
+  }
+
+  Future<List<dynamic>> delete(String path) async {
+    final uri = Uri.parse('${ApiConfig.baseUrl}$path');
+    final res = await http.delete(uri, headers: _headers);
+    if (res.statusCode >= 200 && res.statusCode < 300) {
+      if (res.body.isEmpty) return {};
+      final decoded = jsonDecode(res.body);
+      return decoded is List ? decoded : [decoded];
+    }
+    throw _parseError(res);
   }
 }

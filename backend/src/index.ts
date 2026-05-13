@@ -9,6 +9,7 @@ import { productRoutes } from "./routes/products.js";
 import { farmerRoutes } from "./routes/farmers.js";
 import { orderRoutes } from "./routes/orders.js";
 import { cartRoutes } from "./routes/cart.js";
+import { notificationRoutes } from "./routes/notifications.js";
 
 const app = Fastify({ logger: true });
 
@@ -21,6 +22,7 @@ await app.register(productRoutes, { prefix: "/api/products" });
 await app.register(farmerRoutes, { prefix: "/api/farmers" });
 await app.register(orderRoutes, { prefix: "/api/orders" });
 await app.register(cartRoutes, { prefix: "/api/cart" });
+await app.register(notificationRoutes, { prefix: "/api/notifications" });
 
 app.get("/api/health", async () => ({
   status: "ok",

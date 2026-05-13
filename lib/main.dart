@@ -1,15 +1,22 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'services/api_service.dart';
+import 'services/firebase_service.dart';
 import 'providers/cart_provider.dart';
 import 'providers/auth_provider.dart';
 import 'providers/products_provider.dart';
 import 'theme/app_theme.dart';
 import 'screens/home_screen.dart';
 import 'screens/orders_screen.dart';
+import 'screens/order_detail_screen.dart';
 import 'screens/auth_screen.dart';
 
-void main() {
+// Global navigator key so Firebase service can navigate from notifications
+final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
+
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await initializeFirebase();
   runApp(const FarmConnectApp());
 }
 
@@ -24,6 +31,27 @@ class _FarmConnectAppState extends State<FarmConnectApp> {
   final ApiService _api = ApiService();
 
   @override
+  void initState() {
+    super.initState();
+    // Listen for notification taps when the app is already open
+    _setupNotificationNavigator();
+  }
+
+  void _setupNotificationNavigator() {
+    // When a notification is tapped and the app is in foreground/background,
+    // navigate to the order detail screen if the orderId is present.
+    FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) {
+      final orderId = message.data['orderId'];
+      if (orderId != null) {
+        navigatorKey.currentState?.pushNamed(
+          '/order-detail',
+          arguments: {'orderId': orderId},
+        );
+      }
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
     return MultiProvider(
       providers: [
@@ -32,9 +60,18 @@ class _FarmConnectAppState extends State<FarmConnectApp> {
         ChangeNotifierProvider(create: (_) => ProductsProvider(_api)),
       ],
       child: MaterialApp(
+        navigatorKey: navigatorKey,
         title: 'FarmConnect',
         debugShowCheckedModeBanner: false,
         theme: AppTheme.light,
+        // Named routes for notification-driven navigation
+        routes: {
+          '/order-detail': (context) {
+            final args = ModalRoute.of(context)?.settings.arguments
+                as Map<String, dynamic>?;
+            return OrderDetailScreen(orderId: args?['orderId'] as String? ?? '');
+          },
+        },
         home: const AuthGate(),
       ),
     );

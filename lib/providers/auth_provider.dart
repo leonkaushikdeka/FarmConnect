@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
 import '../services/api_service.dart';
+import '../services/firebase_service.dart';
 
 class AuthProvider extends ChangeNotifier {
   final ApiService _api;
@@ -45,6 +46,8 @@ class AuthProvider extends ChangeNotifier {
       _isLoggedIn = true;
       _isLoading = false;
       notifyListeners();
+      // Register FCM token with the backend
+      await sendTokenToBackend();
       return true;
     } on ApiException catch (e) {
       _error = e.message;
@@ -80,6 +83,7 @@ class AuthProvider extends ChangeNotifier {
       _isLoggedIn = true;
       _isLoading = false;
       notifyListeners();
+      await sendTokenToBackend();
       return true;
     } on ApiException catch (e) {
       _error = e.message;
@@ -123,11 +127,12 @@ class AuthProvider extends ChangeNotifier {
       _userName = user['name'] as String;
       _userEmail = user['email'] as String;
       _userRole = user['role'] as String;
-      _farmer = res['farmer'] as Map<String, dynamic>?;
-      _isLoggedIn = true;
-      _isLoading = false;
-      notifyListeners();
-      return true;
+_farmer = res['farmer'] as Map<String, dynamic>?;
+       _isLoggedIn = true;
+       _isLoading = false;
+       notifyListeners();
+       await sendTokenToBackend();
+       return true;
     } on ApiException catch (e) {
       _error = e.message;
       _isLoading = false;
